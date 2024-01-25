@@ -1,5 +1,12 @@
+#pragma once
 #include <string>
 
 namespace ChessSimulator {
-  std::string Move(std::string move);
+  /**
+   * @brief Move a piece on the board
+   *
+   * @param fen The board as FEN
+   * @return std::string The move as LAN
+   */
+  std::string Move(std::string fen);
 }

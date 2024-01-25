@@ -1,4 +1,14 @@
-
+# ide
 .idea/
+.vscode/
+.vs/
+out/
+build/
+cmake-**/
 
-frontend/package-lock.json
+# node
+**/package-lock.json
+
+
+
+

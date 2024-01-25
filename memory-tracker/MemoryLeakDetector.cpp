@@ -24,3 +24,8 @@ void operator delete(void* mem) noexcept {
   }
   std::free(mem);
 }
+
+memory_stats* get_stats(){
+    static memory_stats stats;
+    return &stats;
+}

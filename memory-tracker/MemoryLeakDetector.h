@@ -6,6 +6,11 @@
 #include <map>
 #include <memory>
 
+struct memory_stats {
+    uint64_t maxUsage;
+    uint64_t currentUsage;
+};
+
 template <typename T> struct track_alloc : std::allocator<T> {
   template <typename U> struct rebind { typedef track_alloc<U> other; };
 
@@ -41,5 +46,6 @@ struct track_printer {
 };
 
 track_type* get_map();
+memory_stats* get_stats();
 
 #endif
