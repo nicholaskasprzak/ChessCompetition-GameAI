@@ -90,11 +90,19 @@ include_directories(${rlImGui_SOURCE_DIR})
 add_library (rlImGui STATIC ${rlImGui_SOURCES})
 target_link_libraries(rlImGui PUBLIC raylib IMGUI)
 
+# add lunasvg
+CPMAddPackage(
+        NAME lunasvg
+        GITHUB_REPOSITORY sammycage/lunasvg
+        GIT_TAG v2.3.9
+)
+include_directories(${lunasvg_SOURCE_DIR}/include)
+
 # chess library
-file(GLOB_RECURSE CHESS_LIB_FILES CONFIGURE_DEPENDS "chess-library/*.cpp" "chess-library/*.h")
-add_library(chesslibrary ${CHESS_LIB_FILES})
-set_target_properties(chesslibrary PROPERTIES LINKER_LANGUAGE CXX)
-include_directories(chess-library)
+file(GLOB_RECURSE CHESS_BOT_FILES CONFIGURE_DEPENDS "chess-bot/*.cpp" "chess-bot/*.h")
+add_library(chessbot ${CHESS_BOT_FILES})
+set_target_properties(chessbot PROPERTIES LINKER_LANGUAGE CXX)
+include_directories(chess-bot)
 
 # chess validator to be used on the backend
 file(GLOB_RECURSE CHESS_VALIDATOR_FILES CONFIGURE_DEPENDS "chess-validator/*.cpp" "chess-validator/*.h")
@@ -103,4 +111,4 @@ add_executable(chessvalidator ${CHESS_VALIDATOR_FILES})
 # chess gui
 file(GLOB_RECURSE CHESS_GUI_FILES CONFIGURE_DEPENDS "chess-gui/*.cpp" "chess-gui/*.h")
 add_executable(chessgui ${CHESS_GUI_FILES})
-target_link_libraries(chessgui PUBLIC raylib rlImGui chesslibrary IMGUI)
+target_link_libraries(chessgui PUBLIC raylib rlImGui chessbot IMGUI lunasvg)
