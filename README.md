@@ -38,5 +38,15 @@ You have to code a chess engine from the ground up. You will receive a string as
 ## DB structure
 
 - users: username, passhash
+- submission: id, userId, date, zip, executable
 - match: id, date, competitionId, whiteUserId, blackUserid, result, moves(uci), whiteScore, blackScore
 - competition: id, date, report(???), matches
+
+## APIs
+
+- Register / Login
+- Submit code
+- Get leaderboard
+- Get competition
+- Get match
+- Request a turn from a specific user - will receive the fen and the userId

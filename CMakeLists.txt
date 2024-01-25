@@ -5,6 +5,7 @@ project(chess CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(FETCHCONTENT_QUIET FALSE)
 include(cmake/get_cpm.cmake)
 
 CPMAddPackage("gh:TheLartians/Format.cmake@1.8.1")
@@ -15,6 +16,8 @@ CPMAddPackage(
         GITHUB_REPOSITORY Disservin/chess-library
         DOWNLOAD_ONLY YES
         GIT_TAG master
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
 )
 include_directories(${disservin_SOURCE_DIR}/include)
 
@@ -26,6 +29,8 @@ CPMAddPackage(
         DOWNLOAD_ONLY YES
         OPTIONS
         "JSON_BuildTests OFF"
+        GIT_PROGRESS TRUE
+        GIT_SHALLOW TRUE
 )
 include_directories(${nlohmann_json_SOURCE_DIR}/single_include)
 
@@ -39,6 +44,8 @@ CPMAddPackage(
         "MAGIC_ENUM_BUILD_EXAMPLES OFF"
         "MAGIC_ENUM_BUILD_TESTS OFF"
         "MAGIC_ENUM_BUILD_INSTALL OFF"
+        GIT_PROGRESS TRUE
+        GIT_SHALLOW TRUE
 )
 include_directories(${magic_enum_SOURCE_DIR}/include)
 
@@ -47,6 +54,8 @@ CPMAddPackage(
         NAME cpr
         GITHUB_REPOSITORY libcpr/cpr
         GIT_TAG master
+        GIT_PROGRESS TRUE
+        GIT_SHALLOW TRUE
 )
 include_directories(${cpr_SOURCE_DIR}/include)
 
@@ -55,6 +64,8 @@ CPMAddPackage(
         NAME raylib
         GITHUB_REPOSITORY raysan5/raylib
         GIT_TAG 5.0
+        GIT_PROGRESS TRUE
+        GIT_SHALLOW TRUE
 )
 
 # add imgui
@@ -62,6 +73,8 @@ CPMAddPackage(
         NAME IMGUI
         GITHUB_REPOSITORY ocornut/imgui
         GIT_TAG docking
+        GIT_PROGRESS TRUE
+        GIT_SHALLOW TRUE
 )
 include_directories(${IMGUI_SOURCE_DIR})
 add_library(IMGUI STATIC)
@@ -80,6 +93,8 @@ CPMAddPackage(
         NAME rlImGui
         GITHUB_REPOSITORY raylib-extras/rlImGui
         GIT_TAG main
+        GIT_PROGRESS TRUE
+        GIT_SHALLOW TRUE
 )
 file(GLOB rlImGui_SOURCES
         ${rlImGui_SOURCE_DIR}/*.cpp
@@ -95,8 +110,15 @@ CPMAddPackage(
         NAME lunasvg
         GITHUB_REPOSITORY sammycage/lunasvg
         GIT_TAG v2.3.9
+        GIT_PROGRESS TRUE
+        GIT_SHALLOW TRUE
 )
 include_directories(${lunasvg_SOURCE_DIR}/include)
+
+# Memory Tracker
+file(GLOB MEMORY_TRACKER_FILES CONFIGURE_DEPENDS "memory-tracker/*.cpp" "memory-tracker/*.h")
+include_directories(memory-tracker)
+add_library(memorytracker STATIC ${MEMORY_TRACKER_FILES})
 
 # chess library
 file(GLOB_RECURSE CHESS_BOT_FILES CONFIGURE_DEPENDS "chess-bot/*.cpp" "chess-bot/*.h")
@@ -111,4 +133,4 @@ add_executable(chessvalidator ${CHESS_VALIDATOR_FILES})
 # chess gui
 file(GLOB_RECURSE CHESS_GUI_FILES CONFIGURE_DEPENDS "chess-gui/*.cpp" "chess-gui/*.h")
 add_executable(chessgui ${CHESS_GUI_FILES})
-target_link_libraries(chessgui PUBLIC raylib rlImGui chessbot IMGUI lunasvg)
+target_link_libraries(chessgui PUBLIC raylib rlImGui chessbot IMGUI lunasvg memorytracker)

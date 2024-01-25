@@ -38,10 +38,13 @@ struct track_printer {
   track_printer(track_type* track) : track(track) {}
   ~track_printer() {
     track_type::const_iterator it = track->begin();
+    uint64_t total = 0;
     while (it != track->end()) {
       std::cerr << "TRACK: leaked at " << it->first << ", " << it->second << " bytes\n";
       ++it;
+      total += it->second;
     }
+    std::cerr << "TRACK: " << track->size() << " allocations leaked, " << total << " bytes\n";
   }
 };
 

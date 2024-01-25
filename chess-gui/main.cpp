@@ -1,3 +1,5 @@
+#include "MemoryLeakDetector.h"
+
 #include "chess-simulator.h"
 #include "chess.hpp"
 
