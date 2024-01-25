@@ -8,7 +8,6 @@ using json = nlohmann::json;
 
 // reads UCI moves string from stdin until the end of the game
 // prints after every move all the states of the board
-
 int main() {
     // read the board
     std::string fen;

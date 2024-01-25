@@ -42,6 +42,54 @@ CPMAddPackage(
 )
 include_directories(${magic_enum_SOURCE_DIR}/include)
 
+# add cpr
+CPMAddPackage(
+        NAME cpr
+        GITHUB_REPOSITORY libcpr/cpr
+        GIT_TAG master
+)
+include_directories(${cpr_SOURCE_DIR}/include)
+
+# add raylib
+CPMAddPackage(
+        NAME raylib
+        GITHUB_REPOSITORY raysan5/raylib
+        GIT_TAG 5.0
+)
+
+# add imgui
+CPMAddPackage(
+        NAME IMGUI
+        GITHUB_REPOSITORY ocornut/imgui
+        GIT_TAG docking
+)
+include_directories(${IMGUI_SOURCE_DIR})
+add_library(IMGUI STATIC)
+target_sources(
+        IMGUI
+        PUBLIC
+        ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
+        ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
+        ${IMGUI_SOURCE_DIR}/imgui_tables.cpp
+        ${IMGUI_SOURCE_DIR}/imgui_widgets.cpp
+        ${IMGUI_SOURCE_DIR}/imgui.cpp
+)
+
+# add rlImGui
+CPMAddPackage(
+        NAME rlImGui
+        GITHUB_REPOSITORY raylib-extras/rlImGui
+        GIT_TAG main
+)
+file(GLOB rlImGui_SOURCES
+        ${rlImGui_SOURCE_DIR}/*.cpp
+        ${rlImGui_SOURCE_DIR}/*.c
+        ${rlImGui_SOURCE_DIR}/imgui/*.cpp
+)
+include_directories(${rlImGui_SOURCE_DIR})
+add_library (rlImGui STATIC ${rlImGui_SOURCES})
+target_link_libraries(rlImGui PUBLIC raylib IMGUI)
+
 # chess library
 file(GLOB_RECURSE CHESS_LIB_FILES CONFIGURE_DEPENDS "chess-library/*.cpp" "chess-library/*.h")
 add_library(chesslibrary ${CHESS_LIB_FILES})
@@ -52,7 +100,7 @@ include_directories(chess-library)
 file(GLOB_RECURSE CHESS_VALIDATOR_FILES CONFIGURE_DEPENDS "chess-validator/*.cpp" "chess-validator/*.h")
 add_executable(chessvalidator ${CHESS_VALIDATOR_FILES})
 
-
-
-
-
+# chess gui
+file(GLOB_RECURSE CHESS_GUI_FILES CONFIGURE_DEPENDS "chess-gui/*.cpp" "chess-gui/*.h")
+add_executable(chessgui ${CHESS_GUI_FILES})
+target_link_libraries(chessgui PUBLIC raylib rlImGui chesslibrary IMGUI)

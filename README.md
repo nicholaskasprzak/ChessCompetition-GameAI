@@ -4,12 +4,12 @@ This is a C++ chess competition base repository. Here we are going to host the f
 
 ## Main activity
 
-You have to code a chess engine from the ground up. You will receive a string as input following [FEN](https://www.chess.com/terms/fen-chess) notation and the output should be the move as [LAN](https://www.chessprogramming.org/Algebraic_Chess_Notation). 
+You have to code a chess engine from the ground up. You will receive a string as input following [FEN](https://www.chess.com/terms/fen-chess) notation and the output should be the move as [UCI](https://en.wikipedia.org/wiki/Universal_Chess_Interface). 
 
 ## Rules
 
 - Implement your chess engine only inside the chess-library folder in C++;
-- Create .h and .cpp files inside chess-library; 
+- Create .h and .cpp files inside chess-library;
 - Obey the interface specified on chess-library;
 - You might want to test your code via terminal via chess-cli, or chess-gui;
 - Merge requests are welcome;
