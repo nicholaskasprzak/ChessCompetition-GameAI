@@ -10,11 +10,61 @@
 
 #include "PieceSvg.h"
 #include <map>
+#include <chrono>
+#include "magic_enum/magic_enum.hpp"
+
+enum class SimulationState {
+    PAUSED,
+    RUNNING,
+};
+
+// ui settings
+auto simulationState = SimulationState::PAUSED;
+std::chrono::nanoseconds timeSpentOnMoves = std::chrono::nanoseconds::zero();
+std::chrono::nanoseconds timeSpentLastMove = std::chrono::milliseconds::zero();
+int64_t accumulatedBytesLeaks = 0;
+string gameResult;
+vector<string> moves;
 
 void move(chess::Board& board) {
+    if(board.isHalfMoveDraw()){
+        auto result = board.getHalfMoveDrawType();
+        gameResult = std::string(magic_enum::enum_name(result.second)) + " " + std::string(magic_enum::enum_name(result.first));
+        return;
+    }
+    auto result = board.isGameOver();
+    gameResult = std::string(magic_enum::enum_name(result.second)) + " " + std::string(magic_enum::enum_name(result.first));
+    if(result.second != chess::GameResult::NONE) {
+        simulationState = SimulationState::PAUSED;
+        return;
+    }
+
+    std::string turn(magic_enum::enum_name(board.sideToMove().internal()));
+
+    auto beforeAllocCount = memory_stats::get()->allocCount;
+    auto beforeAllocSize = memory_stats::get()->allocSize;
+    auto beforeTime = std::chrono::high_resolution_clock::now();
+
+    memory_stats::get()->enabled = true;
     auto moveStr = ChessSimulator::Move(board.getFen(true));
+    memory_stats::get()->enabled = false;
+
+    auto afterTime = std::chrono::high_resolution_clock::now();
+    auto afterAllocSize = memory_stats::get()->allocSize;
+    auto afterAllocCount = memory_stats::get()->allocCount;
+
     auto move = chess::uci::uciToMove(board, moveStr);
+
+    if(afterAllocSize!=beforeAllocSize) {
+        std::cerr << "Memory leak detected: " << afterAllocCount - beforeAllocCount << " allocations not freed; total: " << afterAllocSize - beforeAllocSize << std::endl;
+    }
     board.makeMove(move);
+
+    // update stats
+    accumulatedBytesLeaks += afterAllocSize - beforeAllocSize;
+    timeSpentOnMoves += afterTime - beforeTime;
+    timeSpentLastMove = afterTime - beforeTime;
+    moves.push_back(std::to_string(board.fullMoveNumber()) + " " + turn +": " + moveStr);
 }
 
 auto SvgStringToTexture(std::string svgString){
@@ -46,11 +96,6 @@ auto loadPiecesTextures(){
     return map;
 }
 
-enum class SimulationState {
-    PAUSED,
-    RUNNING,
-};
-
 int main(int argc, char* argv[])
 {
     // Initialization
@@ -63,10 +108,6 @@ int main(int argc, char* argv[])
     SetTargetFPS(144);
     rlImGuiSetup(true);
 
-    // ui settings
-    bool aiEnabled = false;
-    auto aiColor = chess::Color("w");
-    auto simulationState = SimulationState::PAUSED;
 
     // load data
     auto piecesTextures = loadPiecesTextures();
@@ -81,31 +122,6 @@ int main(int argc, char* argv[])
 
         BeginDrawing();
         ClearBackground(DARKGRAY);
-
-        // start ImGui Conent
-        rlImGuiBegin();
-
-        ImGui::Begin("Settings", nullptr);
-        ImGui::Text("%.1fms %.0fFPS | AVG: %.2fms %.1fFPS", ImGui::GetIO().DeltaTime * 1000, 1.0f / ImGui::GetIO().DeltaTime,
-                    1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
-        ImGui::Separator();
-        if (ImGui::Button(ICON_FA_PLAY)) {
-            simulationState = SimulationState::RUNNING;
-        };
-        ImGui::SameLine();
-        if (ImGui::Button(ICON_FA_PAUSE)) {
-            simulationState = SimulationState::PAUSED;
-        };
-        ImGui::SameLine();
-        if (ImGui::Button(ICON_FA_PLAY ICON_FA_PAUSE)){
-            simulationState = SimulationState::PAUSED;
-            move(board);
-        }
-        ImGui::Separator();
-
-        ImGui::End();  // end settings
-
         // game logic
 
         // draw the chess board
@@ -171,10 +187,46 @@ int main(int argc, char* argv[])
             }
         }
 
-        // end game logic
+        // start ImGui Conent
+        rlImGuiBegin();
 
+        ImGui::Begin("Settings", nullptr);
+        ImGui::Text("%.1fms %.0fFPS | AVG: %.2fms %.1fFPS", ImGui::GetIO().DeltaTime * 1000, 1.0f / ImGui::GetIO().DeltaTime,
+                    1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+
+        ImGui::Separator();
+        if (ImGui::Button(ICON_FA_PLAY)) {
+            simulationState = SimulationState::RUNNING;
+        };
+        ImGui::SameLine();
+        if (ImGui::Button(ICON_FA_PAUSE)) {
+            simulationState = SimulationState::PAUSED;
+        };
+        ImGui::SameLine();
+        if (ImGui::Button(ICON_FA_PLAY ICON_FA_PAUSE)){
+            simulationState = SimulationState::PAUSED;
+            move(board);
+        }
+        ImGui::Separator();
+        // statistics
+        ImGui::Text("Acc Time spent: %.2fms", timeSpentOnMoves.count() / 1000000.0);
+        ImGui::Text("Last move dur:  %.2fms", timeSpentLastMove.count() / 1000000.0);
+        ImGui::Text("Bytes leaked: %lld", accumulatedBytesLeaks);
+        ImGui::Text("Game result: %s", gameResult.c_str());
+        // moves
+        ImGui::Separator();
+        ImGui::BeginChild("Moves", ImVec2(0, 0), true);
+        // print moves in reverse order
+        for(auto it = moves.rbegin(); it != moves.rend(); ++it){
+            ImGui::Text("%s", it->c_str());
+        }
+        ImGui::EndChild();
+
+        ImGui::End();  // end settings
         // end ImGui Content
         rlImGuiEnd();
+
+        // end game logic
 
         EndDrawing();
         //----------------------------------------------------------------------------------
