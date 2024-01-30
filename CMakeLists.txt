@@ -8,6 +8,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(FETCHCONTENT_QUIET FALSE)
 include(cmake/get_cpm.cmake)
 
+# set flag to compile only the chessvalidator
+option(CHESS_VALIDATOR_ONLY "Compile only the chess validator" OFF)
+
 CPMAddPackage("gh:TheLartians/Format.cmake@1.8.1")
 
 # add external chess lib to use as a validator for the tools
@@ -49,6 +52,7 @@ CPMAddPackage(
 )
 include_directories(${magic_enum_SOURCE_DIR}/include)
 
+IF(NOT CHESS_VALIDATOR_ONLY)
 # add cpr
 CPMAddPackage(
         NAME cpr
@@ -105,6 +109,17 @@ include_directories(${rlImGui_SOURCE_DIR})
 add_library (rlImGui STATIC ${rlImGui_SOURCES})
 target_link_libraries(rlImGui PUBLIC raylib IMGUI)
 
+# fontawesome
+CPMAddPackage(
+        NAME fontawesome
+        GITHUB_REPOSITORY juliettef/IconFontCppHeaders
+        DOWNLOAD_ONLY YES
+        GIT_TAG main
+        GIT_PROGRESS TRUE
+        GIT_SHALLOW TRUE
+)
+include_directories(${fontawesome_SOURCE_DIR})
+
 # add lunasvg
 CPMAddPackage(
         NAME lunasvg
@@ -114,6 +129,8 @@ CPMAddPackage(
         GIT_SHALLOW TRUE
 )
 include_directories(${lunasvg_SOURCE_DIR}/include)
+
+endif() # NOT CHESS_VALIDATOR_ONLY
 
 # Memory Tracker
 file(GLOB MEMORY_TRACKER_FILES CONFIGURE_DEPENDS "memory-tracker/*.cpp" "memory-tracker/*.h")
@@ -130,7 +147,9 @@ include_directories(chess-bot)
 file(GLOB_RECURSE CHESS_VALIDATOR_FILES CONFIGURE_DEPENDS "chess-validator/*.cpp" "chess-validator/*.h")
 add_executable(chessvalidator ${CHESS_VALIDATOR_FILES})
 
+if(NOT CHESS_VALIDATOR_ONLY)
 # chess gui
 file(GLOB_RECURSE CHESS_GUI_FILES CONFIGURE_DEPENDS "chess-gui/*.cpp" "chess-gui/*.h")
 add_executable(chessgui ${CHESS_GUI_FILES})
 target_link_libraries(chessgui PUBLIC raylib rlImGui chessbot IMGUI lunasvg memorytracker)
+endif() # NOT CHESS_VALIDATOR_ONLY

@@ -21,8 +21,6 @@ You have to code a chess engine from the ground up. You will receive a string as
 - chess-bot: Here you will implement your chess engine;
 - chess-validator: Here you will find the chess-validator code;
 - chess-gui: Here you will find the chess-gui code;
-- frontend: Here you will find the web frontend code;
-- backend: Here you will find the web backend code;
 
 ## How the competition will work
 
@@ -35,18 +33,8 @@ You have to code a chess engine from the ground up. You will receive a string as
 - You may work in teams of up to 2 people;
 - Your username should not match your real name by any means in order do follow FERPA compliance;
 
-## DB structure
+## Web and API
 
-- users: username, passhash
-- submission: id, userId, date, zip, executable
-- match: id, date, competitionId, whiteUserId, blackUserid, result, moves(uci), whiteScore, blackScore
-- competition: id, date, report(???), matches
+The online version will be hosted on https://competition.gameguild.gg
 
-## APIs
-
-- Register / Login
-- Submit code
-- Get leaderboard
-- Get competition
-- Get match
-- Request a turn from a specific user - will receive the fen and the userId
+The source code will be coded here https://github.com/InfiniBrains/website
