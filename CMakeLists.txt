@@ -147,6 +147,11 @@ include_directories(chess-bot)
 file(GLOB_RECURSE CHESS_VALIDATOR_FILES CONFIGURE_DEPENDS "chess-validator/*.cpp" "chess-validator/*.h")
 add_executable(chessvalidator ${CHESS_VALIDATOR_FILES})
 
+# chess cli
+file(GLOB_RECURSE CHESS_CLI_FILES CONFIGURE_DEPENDS "chess-cli/*.cpp" "chess-cli/*.h")
+add_executable(chesscli ${CHESS_CLI_FILES})
+target_link_libraries(chesscli PUBLIC chessbot)
+
 if(NOT CHESS_VALIDATOR_ONLY)
 # chess gui
 file(GLOB_RECURSE CHESS_GUI_FILES CONFIGURE_DEPENDS "chess-gui/*.cpp" "chess-gui/*.h")
