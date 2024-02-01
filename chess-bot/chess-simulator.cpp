@@ -15,6 +15,8 @@ std::string ChessSimulator::Move(std::string fen) {
   chess::Board board(fen);
   chess::Movelist moves;
   chess::movegen::legalmoves(moves, board);
+  if(moves.size() == 0)
+    return "";
 
   // get random move
   std::random_device rd;
