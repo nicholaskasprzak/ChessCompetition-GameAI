@@ -50,9 +50,11 @@ IF(NOT CHESS_VALIDATOR_ONLY)
 CPMAddPackage(
         NAME raylib
         GITHUB_REPOSITORY raysan5/raylib
-        GIT_TAG 5.0
+        GIT_TAG 4.5.0
         GIT_PROGRESS TRUE
         GIT_SHALLOW TRUE
+        OPTIONS
+        "raylib_USE_STATIC_LIBS ON"
 )
 
 # add imgui
