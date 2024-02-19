@@ -35,6 +35,6 @@ You have to code a chess engine from the ground up. You will receive a string as
 
 ## Web and API
 
-The online version will be hosted on https://competition.gameguild.gg
+The online version will be hosted on https://web.gameguild.gg
 
 The source code will be coded here https://github.com/InfiniBrains/website
