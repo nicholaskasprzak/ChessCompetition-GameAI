@@ -1,5 +1,3 @@
-#include "MemoryLeakDetector.h"
-
 #include "chess-simulator.h"
 #include "chess.hpp"
 
@@ -23,7 +21,6 @@ enum class SimulationState {
 auto simulationState = SimulationState::PAUSED;
 std::chrono::nanoseconds timeSpentOnMoves = std::chrono::nanoseconds::zero();
 std::chrono::nanoseconds timeSpentLastMove = std::chrono::milliseconds::zero();
-int64_t allocBalance = 0;
 string gameResult;
 vector<string> moves;
 
@@ -32,7 +29,6 @@ void reset(chess::Board &board){
   simulationState = SimulationState::PAUSED;
   timeSpentOnMoves = std::chrono::nanoseconds::zero();
   timeSpentLastMove = std::chrono::milliseconds::zero();
-  allocBalance = 0;
   gameResult = "";
   moves.clear();
 }
@@ -55,21 +51,14 @@ void move(chess::Board &board) {
 
   std::string turn(magic_enum::enum_name(board.sideToMove().internal()));
   // get stats
-  auto beforeAllocCount = memory_stats::get()->allocCount;
   auto beforeTime = std::chrono::high_resolution_clock::now();
 
   // run!
   auto moveStr = ChessSimulator::Move(board.getFen(true));
   // get stats
   auto afterTime = std::chrono::high_resolution_clock::now();
-  auto afterAllocCount = memory_stats::get()->allocCount;
   // apply move
   auto move = chess::uci::uciToMove(board, moveStr);
-  // check against memory leaks
-  if (afterAllocCount != beforeAllocCount) {
-    std::cerr << "Memory leak detected: " << afterAllocCount - beforeAllocCount
-              << " allocations not freed" << std::endl;
-  }
   board.makeMove(move);
 
   // update stats
@@ -244,8 +233,6 @@ int main(int argc, char *argv[]) {
     ImGui::Text("Acc Time spent: %.3fms", timeSpentOnMoves.count() / 1000000.0);
     ImGui::Text("Last move dur:  %.3fms",
                 timeSpentLastMove.count() / 1000000.0);
-    ImGui::Text("Memory Leaks: %s",
-                allocBalance == 0 ? "None" : to_string(allocBalance).c_str());
 
     ImGui::Text("Game result: %s", gameResult.c_str());
     // moves

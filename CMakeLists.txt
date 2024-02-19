@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(chess CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 # set the output directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -21,26 +21,13 @@ CPMAddPackage("gh:TheLartians/Format.cmake@1.8.1")
 # add external chess lib to use as a validator for the tools
 CPMAddPackage(
         NAME disservin
-        GITHUB_REPOSITORY Disservin/chess-library
+        GITHUB_REPOSITORY InfiniBrains/chess-library
         DOWNLOAD_ONLY YES
         GIT_TAG master
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
 )
 include_directories(${disservin_SOURCE_DIR}/include)
-
-# add json lib
-CPMAddPackage(
-        NAME nlohmann_json
-        VERSION 3.11.3
-        GITHUB_REPOSITORY nlohmann/json
-        DOWNLOAD_ONLY YES
-        OPTIONS
-        "JSON_BuildTests OFF"
-        GIT_PROGRESS TRUE
-        GIT_SHALLOW TRUE
-)
-include_directories(${nlohmann_json_SOURCE_DIR}/single_include)
 
 # add magic_enum lib
 CPMAddPackage(
@@ -58,15 +45,6 @@ CPMAddPackage(
 include_directories(${magic_enum_SOURCE_DIR}/include)
 
 IF(NOT CHESS_VALIDATOR_ONLY)
-# add cpr
-CPMAddPackage(
-        NAME cpr
-        GITHUB_REPOSITORY libcpr/cpr
-        GIT_TAG master
-        GIT_PROGRESS TRUE
-        GIT_SHALLOW TRUE
-)
-include_directories(${cpr_SOURCE_DIR}/include)
 
 # add raylib
 CPMAddPackage(
@@ -137,20 +115,11 @@ include_directories(${lunasvg_SOURCE_DIR}/include)
 
 endif() # NOT CHESS_VALIDATOR_ONLY
 
-# Memory Tracker
-file(GLOB MEMORY_TRACKER_FILES CONFIGURE_DEPENDS "memory-tracker/*.cpp" "memory-tracker/*.h")
-include_directories(memory-tracker)
-add_library(memorytracker STATIC ${MEMORY_TRACKER_FILES})
-
 # chess library
 file(GLOB_RECURSE CHESS_BOT_FILES CONFIGURE_DEPENDS "chess-bot/*.cpp" "chess-bot/*.h")
 add_library(chessbot STATIC ${CHESS_BOT_FILES})
 set_target_properties(chessbot PROPERTIES LINKER_LANGUAGE CXX)
 include_directories(chess-bot)
-
-# chess validator to be used on the backend
-file(GLOB_RECURSE CHESS_VALIDATOR_FILES CONFIGURE_DEPENDS "chess-validator/*.cpp" "chess-validator/*.h")
-add_executable(chessvalidator ${CHESS_VALIDATOR_FILES})
 
 # chess cli
 file(GLOB_RECURSE CHESS_CLI_FILES CONFIGURE_DEPENDS "chess-cli/*.cpp" "chess-cli/*.h")
@@ -161,5 +130,5 @@ if(NOT CHESS_VALIDATOR_ONLY)
 # chess gui
 file(GLOB_RECURSE CHESS_GUI_FILES CONFIGURE_DEPENDS "chess-gui/*.cpp" "chess-gui/*.h")
 add_executable(chessgui ${CHESS_GUI_FILES})
-target_link_libraries(chessgui PUBLIC raylib rlImGui chessbot IMGUI lunasvg memorytracker)
+target_link_libraries(chessgui PUBLIC raylib rlImGui chessbot IMGUI lunasvg)
 endif() # NOT CHESS_VALIDATOR_ONLY
