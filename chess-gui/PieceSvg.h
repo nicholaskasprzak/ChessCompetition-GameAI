@@ -1,6 +1,5 @@
 #ifndef MOBAGEN_PIECESVG_H
 #define MOBAGEN_PIECESVG_H
-#include <lunasvg.h>
 using namespace std;
 static auto PawnWhiteSvgString =
     "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"

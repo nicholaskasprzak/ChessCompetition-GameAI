@@ -46,74 +46,84 @@ include_directories(${magic_enum_SOURCE_DIR}/include)
 
 IF(NOT CHESS_VALIDATOR_ONLY)
 
-# add raylib
-CPMAddPackage(
-        NAME raylib
-        GITHUB_REPOSITORY raysan5/raylib
-        GIT_TAG 4.5.0
-        GIT_PROGRESS TRUE
-        GIT_SHALLOW TRUE
-        OPTIONS
-        "raylib_USE_STATIC_LIBS ON"
-)
+    CPMAddPackage(
+            NAME SDL2
+            GITHUB_REPOSITORY libsdl-org/SDL
+            GIT_TAG release-2.26.2
+            OPTIONS "SDL2_DISABLE_INSTALL ON"
+            "SDL_SHARED OFF"
+            "SDL_STATIC ON"
+            "SDL_STATIC_PIC ON"
+            "SDL_WERROR OFF"
+            "SDL_TEST OFF"
+    )
+    find_package(SDL2 REQUIRED)
+    if(SDL2_ADDED)
+        file(GLOB SDL_HEADERS "${SDL_SOURCE_DIR}/include/*.h")
 
-# add imgui
-CPMAddPackage(
-        NAME IMGUI
-        GITHUB_REPOSITORY ocornut/imgui
-        GIT_TAG docking
-        GIT_PROGRESS TRUE
-        GIT_SHALLOW TRUE
-)
-include_directories(${IMGUI_SOURCE_DIR})
-add_library(IMGUI STATIC)
-target_sources(
-        IMGUI
-        PUBLIC
-        ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
-        ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
-        ${IMGUI_SOURCE_DIR}/imgui_tables.cpp
-        ${IMGUI_SOURCE_DIR}/imgui_widgets.cpp
-        ${IMGUI_SOURCE_DIR}/imgui.cpp
-)
+        # Create a target that copies headers at build time, when they change
+        add_custom_target(
+                sdl_copy_headers_in_build_dir
+                COMMAND ${CMAKE_COMMAND} -E copy_directory "${SDL_SOURCE_DIR}/include"
+                "${CMAKE_BINARY_DIR}/SDLHeaders/SDL2"
+                DEPENDS ${SDL_HEADERS}
+        )
 
-# add rlImGui
-CPMAddPackage(
-        NAME rlImGui
-        GITHUB_REPOSITORY raylib-extras/rlImGui
-        GIT_TAG main
-        GIT_PROGRESS TRUE
-        GIT_SHALLOW TRUE
-)
-file(GLOB rlImGui_SOURCES
-        ${rlImGui_SOURCE_DIR}/*.cpp
-        ${rlImGui_SOURCE_DIR}/*.c
-        ${rlImGui_SOURCE_DIR}/imgui/*.cpp
-)
-include_directories(${rlImGui_SOURCE_DIR})
-add_library (rlImGui STATIC ${rlImGui_SOURCES})
-target_link_libraries(rlImGui PUBLIC raylib IMGUI)
+        # Make SDL depend from it
+        add_dependencies(SDL2 sdl_copy_headers_in_build_dir)
 
-# fontawesome
-CPMAddPackage(
-        NAME fontawesome
-        GITHUB_REPOSITORY juliettef/IconFontCppHeaders
-        DOWNLOAD_ONLY YES
-        GIT_TAG main
-        GIT_PROGRESS TRUE
-        GIT_SHALLOW TRUE
-)
-include_directories(${fontawesome_SOURCE_DIR})
+        # And add the directory where headers have been copied as an interface include dir
+        target_include_directories(SDL2 INTERFACE "${CMAKE_BINARY_DIR}/SDLHeaders")
 
-# add lunasvg
-CPMAddPackage(
-        NAME lunasvg
-        GITHUB_REPOSITORY sammycage/lunasvg
-        GIT_TAG v2.3.9
-        GIT_PROGRESS TRUE
-        GIT_SHALLOW TRUE
-)
-include_directories(${lunasvg_SOURCE_DIR}/include)
+        set(SDL2_INCLUDE_DIR ${SDL2_SOURCE_DIR}/include)
+    endif()
+    include_directories(${SDL2_INCLUDE_DIR})
+
+    CPMAddPackage(GITHUB_REPOSITORY libsdl-org/SDL_image
+            GIT_TAG release-2.6.2
+            OPTIONS
+            "SDL2IMAGE_INSTALL OFF"
+            "SDL2IMAGE_SAMPLES OFF"
+            "SDL2IMAGE_VENDORED ON"
+            "SDL2IMAGE_BUILD_SHARED_LIBS OFF"
+            "GIT_SUBMODULES_RECURSE ON"
+    )
+    find_package(SDL_image REQUIRED)
+    include_directories(${SDL_image_SOURCE_DIR})
+
+    # add imgui
+    CPMAddPackage(
+            NAME IMGUI
+            URL "https://github.com/ocornut/imgui/archive/refs/tags/v1.89.2.zip"
+    )
+    IF(IMGUI_ADDED)
+        add_library(IMGUI STATIC)
+
+        target_sources( IMGUI
+                PRIVATE
+                ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
+                ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
+                ${IMGUI_SOURCE_DIR}/imgui_tables.cpp
+                ${IMGUI_SOURCE_DIR}/imgui_widgets.cpp
+                ${IMGUI_SOURCE_DIR}/imgui.cpp
+
+                PRIVATE
+                ${IMGUI_SOURCE_DIR}/backends/imgui_impl_sdlrenderer.cpp
+                ${IMGUI_SOURCE_DIR}/backends/imgui_impl_sdl.cpp
+                ${IMGUI_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+        )
+        target_include_directories( IMGUI
+                PUBLIC ${IMGUI_SOURCE_DIR}
+                PUBLIC ${IMGUI_SOURCE_DIR}/backends
+        )
+        find_package(OpenGL REQUIRED)
+        if(EMSCRIPTEN)
+            target_link_libraries(IMGUI PUBLIC ${OPENGL_gl_LIBRARY} SDL2 ${CMAKE_DL_LIBS})
+        else()
+            target_link_libraries(IMGUI PUBLIC ${OPENGL_gl_LIBRARY} SDL2-static ${CMAKE_DL_LIBS})
+        endif()
+    ENDIF()
+    include_directories(${IMGUI_SOURCE_DIR} ${IMGUI_SOURCE_DIR}/backends)
 
 endif() # NOT CHESS_VALIDATOR_ONLY
 
@@ -132,5 +142,5 @@ if(NOT CHESS_VALIDATOR_ONLY)
 # chess gui
 file(GLOB_RECURSE CHESS_GUI_FILES CONFIGURE_DEPENDS "chess-gui/*.cpp" "chess-gui/*.h")
 add_executable(chessgui ${CHESS_GUI_FILES})
-target_link_libraries(chessgui PUBLIC raylib rlImGui chessbot IMGUI lunasvg)
+target_link_libraries(chessgui PUBLIC chessbot IMGUI SDL2::SDL2 SDL2_image)
 endif() # NOT CHESS_VALIDATOR_ONLY
