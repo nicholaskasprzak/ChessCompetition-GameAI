@@ -144,3 +144,10 @@ file(GLOB_RECURSE CHESS_GUI_FILES CONFIGURE_DEPENDS "chess-gui/*.cpp" "chess-gui
 add_executable(chessgui ${CHESS_GUI_FILES})
 target_link_libraries(chessgui PUBLIC chessbot IMGUI SDL2::SDL2 SDL2_image)
 endif() # NOT CHESS_VALIDATOR_ONLY
+
+CPMAddPackage(
+        NAME CPMLicenses.cmake
+        GITHUB_REPOSITORY cpm-cmake/CPMLicenses.cmake
+        VERSION 0.0.5
+)
+write_license_disclaimer("third_party.txt" "${CPM_PACKAGES}")
