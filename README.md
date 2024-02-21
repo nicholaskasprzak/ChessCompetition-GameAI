@@ -1,6 +1,6 @@
 # Chess-Competition
 
-This is a C++ chess competition base repository. Here we are going to host the frontend, backend and the simulator of the competition.
+This is a C++ chess competition base repository. Here we are going to host only the chess engine part of the competition. The competition will be held on a web platform, and the source code will be available on a different repository.
 
 ## Main activity
 
@@ -38,3 +38,15 @@ You have to code a chess engine from the ground up. You will receive a string as
 The online version will be hosted on https://web.gameguild.gg
 
 The source code will be coded here https://github.com/InfiniBrains/website
+
+## Third Parties
+
+- [Disservin/chess-library](https://github.com/Disservin/chess-library)
+- [libsdl-org](https://github.com/libsdl-org)
+- [ocornut/ImGUI](https://github.com/ocornut/imgui)
+- [cpm-cmake/cpm.cmake](https://github.com/cpm-cmake/CPM.cmake)
+- [Neargye/magic_enum](https://github.com/Neargye/magic_enum)
+
+## Licences
+
+[Check it out](third_party.txt)

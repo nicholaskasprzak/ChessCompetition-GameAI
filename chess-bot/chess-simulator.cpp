@@ -1,4 +1,6 @@
 #include "chess-simulator.h"
+// disservin's lib. drop a star on his hard work!
+// https://github.com/Disservin/chess-library
 #include "chess.hpp"
 #include <random>
 using namespace ChessSimulator;
