@@ -51,9 +51,6 @@ IF(NOT CHESS_VALIDATOR_ONLY)
             GITHUB_REPOSITORY libsdl-org/SDL
             GIT_TAG release-2.26.2
             OPTIONS "SDL2_DISABLE_INSTALL ON"
-            "SDL_SHARED OFF"
-            "SDL_STATIC ON"
-            "SDL_STATIC_PIC ON"
             "SDL_WERROR OFF"
             "SDL_TEST OFF"
     )
@@ -85,7 +82,6 @@ IF(NOT CHESS_VALIDATOR_ONLY)
             "SDL2IMAGE_INSTALL OFF"
             "SDL2IMAGE_SAMPLES OFF"
             "SDL2IMAGE_VENDORED ON"
-            "SDL2IMAGE_BUILD_SHARED_LIBS OFF"
             "GIT_SUBMODULES_RECURSE ON"
     )
     find_package(SDL_image REQUIRED)
@@ -120,7 +116,7 @@ IF(NOT CHESS_VALIDATOR_ONLY)
         if(EMSCRIPTEN)
             target_link_libraries(IMGUI PUBLIC ${OPENGL_gl_LIBRARY} SDL2 ${CMAKE_DL_LIBS})
         else()
-            target_link_libraries(IMGUI PUBLIC ${OPENGL_gl_LIBRARY} SDL2-static ${CMAKE_DL_LIBS})
+            target_link_libraries(IMGUI PUBLIC ${OPENGL_gl_LIBRARY} SDL2 ${CMAKE_DL_LIBS})
         endif()
     ENDIF()
     include_directories(${IMGUI_SOURCE_DIR} ${IMGUI_SOURCE_DIR}/backends)
